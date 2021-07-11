@@ -13,12 +13,40 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        /*------------------------------ Start | Init data ------------------------------*/
+        val tasks = mutableListOf<Task>()
+        tasks.add(Task("Take out the trash", true,3))
+        tasks.add(Task("Walk the dog", false, 2 ))
+        tasks.add(Task("Make my bed", true, 1 ))
+        tasks.add(Task("Unload the dishwasher", false, 4 ))
+        tasks.add(Task("Make dinner", true, 5 ))
+        /*------------------------------ End | Init data ------------------------------*/
+
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
-                // "just" is an operator that converts its parameters into an observable and emit it
-                Observable.just("Hello RxJava and RxAndroid").subscribe {
-                    Log.d("Reactive Programming", "Result: ${it}")
-                }
+                // Create an observable of Task
+                Observable.create<Task> {
+                    tasks.forEach { task ->
+                        if (task === null) {
+                            // Throw an exception when task is null
+                            it.onError(Exception("Something when wrong"))
+                            return@forEach
+                        }
+                        // Convert Task into an observable
+                        it.onNext(task)
+                    }
+                    // Notify that the observable has finished sending items
+                    it.onComplete()
+                }.subscribe({
+                    // Execute until all task is emmited or error is occured
+                    Log.d("Reactive Programming","onNext: \n Task: \n\t- description: ${it.description} \n\t- isCompleted: ${it.isComplete} \n\t- priority: ${it.priority}")
+                }, {
+                    // Execute when error is occured
+                    Log.d("Reactive Programming", "onError: ${it.message}")
+                }, {
+                    // Execute when all task is emmited
+                    Log.d("Reactive Programming","onComplete: All is done!")
+                })
             }
         }
 
