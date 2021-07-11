@@ -14,10 +14,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         /*------------------------------ Start | Init data ------------------------------*/
-        val tasks = mutableListOf<Task>()
+        val tasks = mutableListOf<Task?>()
         tasks.add(Task("Take out the trash", true,3))
         tasks.add(Task("Walk the dog", false, 2 ))
         tasks.add(Task("Make my bed", true, 1 ))
+        tasks.add(null)
         tasks.add(Task("Unload the dishwasher", false, 4 ))
         tasks.add(Task("Make dinner", true, 5 ))
         /*------------------------------ End | Init data ------------------------------*/
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
                     // Execute when error is occured
                     Log.d("Reactive Programming", "onError: ${it.message}")
                 }, {
-                    // Execute when all task is emmited
+                    // Execute when all task is emmited (It will never executed when when error is occured)
                     Log.d("Reactive Programming","onComplete: All is done!")
                 })
             }
