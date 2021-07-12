@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.example.kotlinfundamental.databinding.ActivityMainBinding
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.util.*
 import kotlin.random.Random
 
@@ -27,7 +29,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
                 // Create an observable of Task
-                Observable.create<Task> {
+                Observable
+                // "create" is executed on IO Thread because of "subscribeOn(Schedulers.io())"
+                .create<Task> {
+                    Log.d("Reactive Programming", "create Thread: ${Thread.currentThread().name}")
                     tasks.forEach { task ->
                         if (task === null) {
                             // Throw an exception when task is null
@@ -39,11 +44,34 @@ class MainActivity : AppCompatActivity() {
                     }
                     // Notify that the observable has finished sending items
                     it.onComplete()
-                }.map {
+                }
+                /**
+                 * - "subscribeOn" specifies the thread on which the observable will be subscribed
+                 * - It will stay on it downstream (The thread will be changed when we change thread by using "observeOn")
+                 * - If there are multiple instances of subscribeOn in the stream, only the first one has a practical effect
+                 * */
+                .subscribeOn(Schedulers.io())
+                // "map" is executed on IO Thread because of "subscribeOn(Schedulers.io())"
+                .map {
+                    Log.d("Reactive Programming", "map #1 Thread: ${Thread.currentThread().name}")
+                    // "Map" is an operator used to modify each item emitted by an Observable and it returns modified item as an anything (object, value, etc.)
+                    it.isComplete = false
+                    it
+                }
+                /**
+                 * "observeOn" specifies the thread on which the next operators in the chain (Downstream) will be executed
+                 * */
+                .observeOn(AndroidSchedulers.mainThread())
+                // "map" is executed on Main Thread because of observeOn(AndroidSchedulers.mainThread())
+                .map {
+                    Log.d("Reactive Programming", "map #2 Thread: ${Thread.currentThread().name}")
                     // "Map" is an operator used to modify each item emitted by an Observable and it returns modified item as an anything (object, value, etc.)
                     it.isComplete = true
                     it
-                }.subscribe({
+                }
+                // "subscribe" is executed on Main Thread because of observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    Log.d("Reactive Programming", "subscribe Thread: ${Thread.currentThread().name}")
                     // Execute until all task is emmited or error is occured
                     Log.d("Reactive Programming","onNext: \n Task: \n\t- description: ${it.description} \n\t- isCompleted: ${it.isComplete} \n\t- priority: ${it.priority}")
                 }, {
