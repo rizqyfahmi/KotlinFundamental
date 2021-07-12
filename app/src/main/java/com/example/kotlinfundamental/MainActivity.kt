@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import com.example.kotlinfundamental.databinding.ActivityMainBinding
 import io.reactivex.rxjava3.core.Observable
+import java.util.*
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         tasks.add(Task("Take out the trash", true,3))
         tasks.add(Task("Walk the dog", false, 2 ))
         tasks.add(Task("Make my bed", true, 1 ))
-        tasks.add(null)
         tasks.add(Task("Unload the dishwasher", false, 4 ))
         tasks.add(Task("Make dinner", true, 5 ))
         /*------------------------------ End | Init data ------------------------------*/
@@ -38,6 +39,10 @@ class MainActivity : AppCompatActivity() {
                     }
                     // Notify that the observable has finished sending items
                     it.onComplete()
+                }.map {
+                    // "Map" is an operator used to modify each item emitted by an Observable and it returns modified item as an anything (object, value, etc.)
+                    it.isComplete = true
+                    it
                 }.subscribe({
                     // Execute until all task is emmited or error is occured
                     Log.d("Reactive Programming","onNext: \n Task: \n\t- description: ${it.description} \n\t- isCompleted: ${it.isComplete} \n\t- priority: ${it.priority}")
