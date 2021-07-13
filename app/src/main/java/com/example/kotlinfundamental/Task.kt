@@ -1,3 +1,5 @@
 package com.example.kotlinfundamental
 
-data class Task (var description: String, var isComplete: Boolean, var priority: Int)
+data class Task (var description: String, var isComplete: Boolean, var priority: Int) {
+    var location: Location? = null
+}

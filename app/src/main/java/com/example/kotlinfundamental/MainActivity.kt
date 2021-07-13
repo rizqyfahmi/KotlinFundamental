@@ -59,22 +59,31 @@ class MainActivity : AppCompatActivity() {
                     it
                 }
                 /**
-                 * - This "subscribeOn" has no effect to downstream because we have initialized "subscribeOn" above
-                 * - Remember! only the first one has a practical effect
+                 * "observeOn" specifies the thread on which the next operators in the chain (Downstream) will be executed
                  * */
-                .subscribeOn(AndroidSchedulers.mainThread())
-                // "map" is still on IO Thread because of "subscribeOn(Schedulers.io())"
+                .observeOn(AndroidSchedulers.mainThread())
+                // "map" is executed on Main Thread because of observeOn(AndroidSchedulers.mainThread())
                 .map {
                     Log.d("Reactive Programming", "map #2 Thread: ${Thread.currentThread().name}")
                     // "Map" is an operator used to modify each item emitted by an Observable and it returns modified item as an anything (object, value, etc.)
                     it.isComplete = true
                     it
                 }
-                // "subscribe" is still on IO Thread because of "subscribeOn(Schedulers.io())"
+                // "flatMap" is executed on Main Thread because of observeOn(AndroidSchedulers.mainThread())
+                .flatMap {
+                    Log.d("Reactive Programming", "flatMap Thread: ${Thread.currentThread().name}")
+                    // "Map" is an operator used to modify each item emitted by an Observable and it returns modified item as an anything (object, value, etc.)
+                    it.isComplete = true
+                    // Let's assume we want to make another network request and we don't want to make it on Main Thread (Avoid UI Freeze) then we do it on IO thread inside "getLocationObservable"
+                    getLocationObservable(it)
+                }
+                // Change the thread (Back to Main Thread)
+                .observeOn(AndroidSchedulers.mainThread())
+                // "subscribe" is executed on Main Thread because of observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     Log.d("Reactive Programming", "subscribe Thread: ${Thread.currentThread().name}")
                     // Execute until all task is emmited or error is occured
-                    Log.d("Reactive Programming","onNext: \n Task: \n\t- description: ${it.description} \n\t- isCompleted: ${it.isComplete} \n\t- priority: ${it.priority}")
+                    Log.d("Reactive Programming","onNext: \n Task: \n\t- description: ${it.description} \n\t- isCompleted: ${it.isComplete} \n\t- priority: ${it.priority} \n\t- location: ${it.location?.country}")
                 }, {
                     // Execute when error is occured
                     Log.d("Reactive Programming", "onError: ${it.message}")
@@ -86,5 +95,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(binding.root)
+    }
+
+    private fun getLocationObservable(task: Task): Observable<Task> {
+        return Observable
+        // "create" is executed on IO Thread because of "subscribeOn(Schedulers.io())" below
+        .create<Task> { emitter ->
+            Log.d("Reactive Programming", "create location Thread: ${Thread.currentThread().name}")
+            if (!emitter.isDisposed) {
+                val location = Location("Home", "Jakarta", "Indonesia")
+                task.location = location
+
+                val delay = Random.nextLong(1000) + 500
+                Thread.sleep(delay)
+                emitter.onNext(task)
+                emitter.onComplete()
+            }
+        }.subscribeOn(Schedulers.io())
     }
 }
