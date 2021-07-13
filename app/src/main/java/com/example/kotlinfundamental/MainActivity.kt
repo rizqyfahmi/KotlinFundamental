@@ -18,10 +18,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
                 /**
-                 * "fromArray" converts an array (vararg in kotlin) into an ObservableSource that emits the items in the array (vararg in kotlin).
-                 * It takes a vararg as its parameter
+                 * "fromArray" converts an Iterable sequence into an Observable that emits the items in the sequence.
+                 * It takes a List, mutableList, Set, and mutableSet as its parameter
                  * */
-                val observable = Observable.fromArray(1, 2,3, 4, 5, 6, 7, 8, 9, 10)
+                val items = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                val observable = Observable.fromIterable(items)
                 val observer = object: Observer<Int> {
                     // it's called when observer is subscribe observable
                     override fun onSubscribe(d: Disposable?) {
@@ -29,11 +30,11 @@ class MainActivity : AppCompatActivity() {
                     }
                     // it's called when each items is emitted by observable
                     override fun onNext(t: Int?) {
-                        Log.d("Reactive Programming", "onNext!")
+                        Log.d("Reactive Programming", "onNext!: ${t.toString()}")
                     }
                     // it's called when error is occurred
                     override fun onError(e: Throwable?) {
-                        Log.d("Reactive Programming", "onError!")
+                        Log.d("Reactive Programming", "onError!: ${e?.message}")
                     }
                     // it's called when observable finishes emitting all items
                     override fun onComplete() {
