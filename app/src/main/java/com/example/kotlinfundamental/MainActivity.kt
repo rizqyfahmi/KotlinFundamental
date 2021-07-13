@@ -18,11 +18,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
                 /**
-                 * "fromArray" converts an Iterable sequence into an Observable that emits the items in the sequence.
-                 * It takes a List, mutableList, Set, and mutableSet as its parameter
+                 * "range" creates an Observable that emits a particular range of sequential integers
+                 * It takes 2 parameters such as start and count
                  * */
-                val items = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                val observable = Observable.fromIterable(items)
+                val observable = Observable.range(1, 10)
                 val observer = object: Observer<Int> {
                     // it's called when observer is subscribe observable
                     override fun onSubscribe(d: Disposable?) {
