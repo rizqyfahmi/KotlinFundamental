@@ -18,11 +18,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
                 /**
-                 * "Just" converts an object or a set of objects into an Observable that emits that
-                 * It takes set of variables as its parameter
-                 * It can only accept 10 parameters (item1 ... item10)
+                 * "fromArray" converts an array (vararg in kotlin) into an ObservableSource that emits the items in the array (vararg in kotlin).
+                 * It takes a vararg as its parameter
                  * */
-                val observable = Observable.just(1, 2,3, 4, 5, 6, 7, 8, 9, 10)
+                val observable = Observable.fromArray(1, 2,3, 4, 5, 6, 7, 8, 9, 10)
                 val observer = object: Observer<Int> {
                     // it's called when observer is subscribe observable
                     override fun onSubscribe(d: Disposable?) {
