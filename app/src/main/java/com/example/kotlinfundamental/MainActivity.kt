@@ -18,10 +18,10 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             btnObserve.setOnClickListener {
                 /**
-                 * "range" creates an Observable that emits a particular range of sequential integers
-                 * It takes 2 parameters such as start and count
+                 * "range" create an Observable that emits a particular item or sequence of items repeatedly
+                 * It takes times as the total of repetition
                  * */
-                val observable = Observable.range(1, 10)
+                val observable = Observable.range(1, 10).repeat(2)
                 val observer = object: Observer<Int> {
                     // it's called when observer is subscribe observable
                     override fun onSubscribe(d: Disposable?) {
